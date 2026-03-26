@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ROS2 build artifacts
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+
+# ML artifacts — large files, do NOT track
+checkpoints/
+*.pt
+*.pth
+*.onnx
+outputs/
+wandb/
+
+# Data — too large for git
+data/
+datasets/
+*.hdf5
+*.parquet
+*.mp4
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment
+.env
+*.log
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Upstream repos (cloned, not committed)
+upstream/
+
+# Python venvs
+ros2_venvs/

@@ -1,0 +1,84 @@
+# ============================================================
+# SINGLE SOURCE OF TRUTH — All shared parameters live here.
+# If changing a value requires editing more than one file,
+# the architecture is wrong.
+# ============================================================
+
+project:
+  name: so101_ros2_manip
+  version: "0.1.0"
+
+robot:
+  name: so101
+  dof: 6                    # 5 arm joints + 1 gripper
+  arm_joints: 5
+  gripper_joints: 1
+  joint_names:
+    - shoulder_pan          # base rotation
+    - shoulder_lift         # shoulder
+    - elbow_flex            # elbow
+    - wrist_flex            # wrist pitch
+    - wrist_roll            # wrist roll
+    - gripper               # gripper open/close
+  joint_limits_deg:         # VERIFIED from MJCF (scene.xml)
+    shoulder_pan:  [-110.0, 110.0]
+    shoulder_lift: [-100.0, 100.0]
+    elbow_flex:    [-96.8, 96.8]
+    wrist_flex:    [-95.0, 95.0]
+    wrist_roll:    [-157.2, 162.8]
+    gripper:       [-10.0, 100.0]
+  body_names:               # VERIFIED from MJCF
+    - world
+    - base
+    - shoulder
+    - upper_arm
+    - lower_arm
+    - wrist
+    - gripper
+    - moving_jaw_so101_v1
+
+simulation:
+  mjcf_scene: upstream/SO-ARM100/Simulation/SO101/scene.xml
+  mjcf_model: upstream/SO-ARM100/Simulation/SO101/so101_new_calib.xml
+  mjcf_assets: upstream/SO-ARM100/Simulation/SO101/assets
+  physics_dt: 0.002         # MuJoCo timestep (500Hz physics)
+  control_dt: 0.02          # Control loop rate (50Hz = 20ms)
+  camera:
+    width: 640
+    height: 480
+    fps: 30
+    fov_degrees: 60         # Will be set when we add cameras in Phase 1
+
+perception:
+  model: yolov8n            # YOLOv8 nano — fits 4GB VRAM
+  confidence_threshold: 0.5
+  input_size: 640
+  target_objects:
+    - cube
+
+planning:
+  max_velocity_scaling: 0.5       # Conservative for safety
+  max_acceleration_scaling: 0.3
+  planning_time_seconds: 5.0
+  num_planning_attempts: 10
+
+policy:
+  architecture: act                # Action Chunking Transformer
+  chunk_size: 100                  # Action chunk length
+  inference_frequency_hz: 50       # Must match control_dt
+  checkpoint_path: ""              # Set after training
+
+training:
+  num_episodes: 50                 # Demo episodes to collect
+  batch_size: 8
+  learning_rate: 0.0001
+  max_steps: 100000
+  eval_frequency: 5000
+  seed: 42
+
+paths:
+  upstream_so_arm100: upstream/SO-ARM100
+  ros2_workspace: ros2_ws
+  datasets: data
+  checkpoints: checkpoints
+  outputs: outputs
