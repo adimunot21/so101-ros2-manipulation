@@ -1,0 +1,101 @@
+# ============================================================
+# ros2_control controller configuration for SO-101
+#
+# This file is loaded by controller_manager at launch time.
+# It defines:
+#   1. Which controllers exist
+#   2. Which joints each controller manages
+#   3. Controller-specific parameters
+#
+# controller_manager:
+#   The supervisor node. Loads, configures, starts, and stops
+#   controllers. It talks to the hardware interface (MuJoCo)
+#   and routes commands from controllers to joints.
+#
+# joint_state_broadcaster:
+#   NOT a controller — it's a broadcaster. It reads joint states
+#   (position, velocity, effort) from the hardware interface and
+#   publishes them on /joint_states. robot_state_publisher
+#   subscribes to this to update TF transforms for RViz2.
+#   Every ros2_control setup needs this.
+#
+# arm_controller (joint_trajectory_controller):
+#   Accepts trajectory goals (target positions + time) and
+#   interpolates smooth motion. This is what MoveIt2 sends
+#   commands to in Phase 2.
+#
+# gripper_controller (joint_trajectory_controller):
+#   Same type but for the gripper joint only. Separated because
+#   MoveIt2 treats arm and gripper as different planning groups.
+# ============================================================
+
+controller_manager:
+  ros__parameters:
+    update_rate: 50  # Hz — matches control_dt in project_config.yaml (0.02s = 50Hz)
+
+    # Declare which controllers exist (loaded on startup)
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    gripper_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+# ── Joint State Broadcaster ──────────────────────────────────
+# No special config needed — it automatically reads all joints
+# from the hardware interface.
+joint_state_broadcaster:
+  ros__parameters:
+    use_sim_time: true
+
+# ── Arm Controller ───────────────────────────────────────────
+arm_controller:
+  ros__parameters:
+    use_sim_time: true
+    joints:
+      - shoulder_pan
+      - shoulder_lift
+      - elbow_flex
+      - wrist_flex
+      - wrist_roll
+
+    # Which interfaces this controller uses
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+
+    # Trajectory execution settings
+    state_publish_rate: 50.0           # Hz — how often to publish controller state
+    action_monitor_rate: 20.0          # Hz — how often to check goal status
+    allow_partial_joints_goal: false   # Must specify all 5 arm joints in every goal
+    open_loop_control: false           # Use feedback (closed-loop)
+
+    constraints:
+      stopped_velocity_tolerance: 0.05  # rad/s — "stopped" threshold
+      goal_time: 0.0                    # 0 = no time constraint on reaching goal
+
+# ── Gripper Controller ───────────────────────────────────────
+gripper_controller:
+  ros__parameters:
+    use_sim_time: true
+    joints:
+      - gripper
+
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+
+    state_publish_rate: 50.0
+    action_monitor_rate: 20.0
+    allow_partial_joints_goal: false
+    open_loop_control: false
+
+    constraints:
+      stopped_velocity_tolerance: 0.05
+      goal_time: 0.0
