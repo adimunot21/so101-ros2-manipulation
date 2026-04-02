@@ -1,112 +1,45 @@
-<!--
-  MuJoCo scene for SO-101 manipulation tasks.
-
-  This file includes the upstream SO-101 model and adds:
-    - Ground plane with checkerboard texture
-    - Table at a reachable position
-    - Overhead camera for perception pipeline (Phase 3)
-    - Wrist camera placeholder
-    - A cube as the manipulation target
-
-  The SO-101 base sits at the world origin on the table surface.
-  The table is 0.6m × 0.4m, surface at z=0.0 (arm base is at z=0).
-  The cube is placed within the arm's workspace (~0.15-0.25m reach).
-
-  Coordinate convention:
-    +X = forward (away from arm base)
-    +Y = left
-    +Z = up
--->
 <mujoco model="so101_manipulation_scene">
-  <!--
-    Include the upstream SO-101 model.
-    This brings in all bodies, joints, actuators, and meshes.
-    The path is relative to this file's location.
-    NOTE: mujoco_ros2_control will load this file, so the path
-    must resolve from the installed package location.
-  -->
   <include file="so101_new_calib.xml" />
 
-  <!-- ── Visual settings ─────────────────────────────────────────── -->
   <visual>
     <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0" />
     <rgba haze="0.15 0.25 0.35 1" />
     <global azimuth="160" elevation="-20" />
   </visual>
 
-  <!-- ── Textures and materials ──────────────────────────────────── -->
   <asset>
     <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0"
              width="512" height="3072" />
-    <texture type="2d" name="groundplane" builtin="checker" mark="edge"
-             rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8"
-             width="300" height="300" />
     <texture type="2d" name="table_tex" builtin="flat"
              rgb1="0.6 0.5 0.4" width="512" height="512" />
-    <texture type="2d" name="cube_tex" builtin="flat"
-             rgb1="0.8 0.2 0.2" width="64" height="64" />
-    <material name="groundplane" texture="groundplane" texuniform="true"
-              texrepeat="5 5" reflectance="0.2" />
     <material name="table_mat" texture="table_tex" specular="0.3" shininess="0.5" />
-    <material name="cube_mat" texture="cube_tex" specular="0.5" shininess="0.8" />
   </asset>
 
-  <!-- ── World objects ───────────────────────────────────────────── -->
   <worldbody>
-    <!-- Lighting -->
-    <light pos="0 0 1.5" dir="0 0 -1" directional="true" castshadow="true" />
-    <light pos="0.5 0.3 1.0" dir="-0.3 -0.2 -1" diffuse="0.4 0.4 0.4" />
+    <light pos="1 1 3.5" dir="-0.27 -0.27 -0.92" directional="true" diffuse="0.5 0.5 0.5"/>
+    <light pos="0 0 3.5" dir="0 0 -1" directional="true" diffuse="0.5 0.5 0.5"/>
 
-    <!-- Ground plane (below the table) -->
-    <geom name="floor" size="0 0 0.05" pos="0 0 -0.6" type="plane"
-          material="groundplane" />
+    <!-- Floor below table -->
+    <geom name="floor" type="plane" size="0 0 0.05" pos="0 0 -0.6"
+          rgba="0.2 0.3 0.4 1" contype="1" conaffinity="1"/>
 
-    <!--
-      Table.
-      The SO-101 base sits at z=0 (world origin).
-      Table surface is at z=0, meaning the table body extends downward.
-      Table dimensions: 0.6m × 0.4m × 0.6m tall
-      Position: centered at x=0.1 (slightly in front of arm base)
-    -->
+    <!-- Table: surface at z=0 -->
     <body name="table" pos="0.1 0 -0.3">
       <geom name="table_top" type="box" size="0.3 0.2 0.3"
-            material="table_mat" mass="10" />
+            material="table_mat" mass="10" contype="1" conaffinity="1"/>
     </body>
 
-    <!--
-      Manipulation target: a small red cube.
-      Placed on the table surface (z=0) at a reachable position.
-
-      Reachability justification:
-        - SO-101 upper arm: ~112mm, lower arm: ~135mm
-        - Total reach from shoulder: ~247mm = 0.247m
-        - Shoulder is offset from base by ~62mm in z, ~39mm in x
-        - Cube at x=0.15, y=0 is well within workspace
-        - Cube size: 3cm cube (graspable by SO-101 gripper)
-    -->
+    <!-- Cube on table -->
     <body name="cube" pos="0.28 0.0 0.02">
       <freejoint name="cube_joint"/>
       <geom name="cube_geom" type="box" size="0.02 0.02 0.02"
-            material="cube_mat" mass="0.02"
-            contype="1" conaffinity="1" condim="4"
-            friction="1.0 0.05 0.001" solref="0.01 1" solimp="0.95 0.99 0.001" />
-            friction="1.0 0.005 0.0001"
-            condim="4" />
+            rgba="0.8 0.2 0.2 1" mass="0.02"
+            contype="1" conaffinity="1" condim="4" friction="1 0.05 0.001"
+            solref="0.01 1" solimp="0.95 0.99 0.001"/>
     </body>
 
-    <!--
-      Overhead camera for perception (Phase 3).
-      Positioned above the workspace looking down.
-      640×480 resolution set in the sensor section.
-    -->
-    <camera name="overhead_cam" pos="0.12 0.10 0.7" quat="1 0 0 0" resolution="640 480"
-            fovy="75" />
-
-    <!--
-      Wrist camera placeholder.
-      Attached to the gripper_link body (defined in so101_new_calib.xml).
-      We reference it by name — MuJoCo resolves it from the included model.
-      NOTE: This may need adjustment once we verify the gripper body name.
-    -->
+    <!-- Overhead camera -->
+    <camera name="overhead_cam" pos="0.20 0.10 0.7" quat="1 0 0 0"
+            fovy="75" resolution="640 480"/>
   </worldbody>
 </mujoco>
