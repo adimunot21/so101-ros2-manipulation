@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SRDF (Semantic Robot Description Format) for SO-101.
+
+  This file adds semantic information on top of the URDF:
+    - Planning groups: which joints MoveIt2 plans together
+    - Group states: named poses (home, ready, etc.)
+    - Disable collisions: link pairs that should be ignored
+      (adjacent links always geometrically overlap at the joint)
+    - End effector: which group is the gripper
+
+  The joint names and link names MUST match the URDF exactly.
+-->
+<robot name="so101_new_calib">
+
+  <!-- ── Planning Groups ─────────────────────────────────────── -->
+  <!--
+    "arm" group: the 5 joints that position the wrist in space.
+    MoveIt2 uses this group for IK and motion planning.
+    The chain goes from base_link to gripper_link.
+  -->
+  <group name="arm">
+    <chain base_link="base_link" tip_link="gripper_frame_link" />
+  </group>
+
+  <!--
+    "gripper" group: just the gripper joint.
+    Separated because opening/closing the gripper is a different
+    action than moving the arm through space.
+  -->
+  <group name="gripper">
+    <joint name="gripper" />
+  </group>
+
+  <!-- ── End Effector ────────────────────────────────────────── -->
+  <!--
+    Tells MoveIt2 that "gripper" is the end effector attached to
+    the "arm" group, mounted on gripper_link.
+  -->
+  <end_effector name="gripper_ee" parent_link="gripper_link"
+                group="gripper" parent_group="arm" />
+
+  <!-- ── Named Poses ─────────────────────────────────────────── -->
+  <!--
+    Predefined joint configurations you can plan to by name.
+    Values in radians. These were chosen by:
+      1. Looking at joint limits from MJCF inspection
+      2. Picking safe configurations within those limits
+      3. Will be refined after testing in sim
+  -->
+
+  <!-- All joints at zero — arm pointing straight up -->
+  <group_state name="home" group="arm">
+    <joint name="shoulder_pan"  value="0.0" />
+    <joint name="shoulder_lift" value="0.0" />
+    <joint name="elbow_flex"    value="0.0" />
+    <joint name="wrist_flex"    value="0.0" />
+    <joint name="wrist_roll"    value="0.0" />
+  </group_state>
+
+  <!-- Arm reaching forward, ready to approach objects on table -->
+  <group_state name="ready" group="arm">
+    <joint name="shoulder_pan"  value="0.0" />
+    <joint name="shoulder_lift" value="-0.5" />
+    <joint name="elbow_flex"    value="0.8" />
+    <joint name="wrist_flex"    value="-0.3" />
+    <joint name="wrist_roll"    value="0.0" />
+  </group_state>
+
+  <!-- Gripper states -->
+  <group_state name="open" group="gripper">
+    <joint name="gripper" value="1.0" />
+  </group_state>
+
+  <group_state name="closed" group="gripper">
+    <joint name="gripper" value="-0.1" />
+  </group_state>
+
+  <!-- ── Disable Collisions ──────────────────────────────────── -->
+  <!--
+    Adjacent links always overlap geometrically at the joint.
+    Without disabling these pairs, MoveIt2 would think the robot
+    is ALWAYS in collision and refuse to plan anything.
+
+    Rule: disable collision between every parent-child link pair,
+    plus pairs that are physically close and can never actually
+    collide (like base and upper_arm which are separated by shoulder).
+  -->
+  <!-- Adjacent pairs (parent-child in kinematic chain) -->
+  <disable_collisions link1="base_link"       link2="shoulder_link"            reason="Adjacent" />
+  <disable_collisions link1="shoulder_link"    link2="upper_arm_link"           reason="Adjacent" />
+  <disable_collisions link1="upper_arm_link"   link2="lower_arm_link"           reason="Adjacent" />
+  <disable_collisions link1="lower_arm_link"   link2="wrist_link"               reason="Adjacent" />
+  <disable_collisions link1="wrist_link"       link2="gripper_link"             reason="Adjacent" />
+  <disable_collisions link1="gripper_link"     link2="moving_jaw_so101_v1_link" reason="Adjacent" />
+  <disable_collisions link1="gripper_link"     link2="gripper_frame_link"       reason="Adjacent" />
+
+  <!-- Near-adjacent pairs (separated by one link, can't physically collide) -->
+  <disable_collisions link1="base_link"       link2="upper_arm_link"           reason="Never" />
+  <disable_collisions link1="shoulder_link"   link2="lower_arm_link"           reason="Never" />
+  <disable_collisions link1="upper_arm_link"  link2="wrist_link"               reason="Never" />
+  <disable_collisions link1="lower_arm_link"  link2="gripper_link"             reason="Never" />
+  <disable_collisions link1="wrist_link"      link2="moving_jaw_so101_v1_link" reason="Never" />
+  <disable_collisions link1="wrist_link"      link2="gripper_frame_link"       reason="Never" />
+  <disable_collisions link1="lower_arm_link"  link2="moving_jaw_so101_v1_link" reason="Never" />
+  <disable_collisions link1="lower_arm_link"  link2="gripper_frame_link"       reason="Never" />
+
+</robot>

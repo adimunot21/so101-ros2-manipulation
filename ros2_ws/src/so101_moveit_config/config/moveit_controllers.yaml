@@ -1,0 +1,24 @@
+# Maps MoveIt2 planning groups to ros2_control controllers.
+/**:
+  ros__parameters:
+    moveit_simple_controller_manager:
+      controller_names:
+        - arm_controller
+        - gripper_controller
+      arm_controller:
+        action_ns: follow_joint_trajectory
+        type: FollowJointTrajectory
+        default: true
+        joints:
+          - shoulder_pan
+          - shoulder_lift
+          - elbow_flex
+          - wrist_flex
+          - wrist_roll
+      gripper_controller:
+        action_ns: follow_joint_trajectory
+        type: FollowJointTrajectory
+        default: true
+        joints:
+          - gripper
+    moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControllerManager
