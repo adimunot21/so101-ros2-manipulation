@@ -1,0 +1,33 @@
+# Perception pipeline configuration.
+# All detection parameters in one place (Critical Rule #1).
+/**:
+  ros__parameters:
+    # Detection method: "color" for sim, "yolov8" for real (Phase 8)
+    detection_method: color
+
+    # Color detection parameters (HSV thresholds for red cube)
+    # MuJoCo renders the cube as rgb(204, 51, 51) approximately.
+    # In HSV: H≈0°(or 170-180°), S high, V high
+    color_detection:
+      # Red wraps around in HSV, so we use two ranges
+      h_low_1: 0
+      h_high_1: 10
+      h_low_2: 160
+      h_high_2: 180
+      s_low: 80
+      s_high: 255
+      v_low: 80
+      v_high: 255
+      min_area_pixels: 50     # Ignore detections smaller than this
+
+    # Camera frame for TF
+    camera_frame: overhead_cam_frame
+
+    # Topics
+    color_topic: /overhead_cam/color
+    depth_topic: /overhead_cam/depth
+    camera_info_topic: /overhead_cam/camera_info
+
+    # Output
+    detection_topic: /detected_objects
+    debug_image_topic: /perception/debug_image
