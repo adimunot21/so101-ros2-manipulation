@@ -84,10 +84,12 @@
         - Cube at x=0.15, y=0 is well within workspace
         - Cube size: 3cm cube (graspable by SO-101 gripper)
     -->
-    <body name="cube" pos="0.15 0.0 0.015">
+    <body name="cube" pos="0.28 0.0 0.02">
       <freejoint name="cube_joint"/>
-      <geom name="cube_geom" type="box" size="0.015 0.015 0.015"
-            material="cube_mat" mass="0.01"
+      <geom name="cube_geom" type="box" size="0.02 0.02 0.02"
+            material="cube_mat" mass="0.02"
+            contype="1" conaffinity="1" condim="4"
+            friction="1.0 0.05 0.001" solref="0.01 1" solimp="0.95 0.99 0.001" />
             friction="1.0 0.005 0.0001"
             condim="4" />
     </body>

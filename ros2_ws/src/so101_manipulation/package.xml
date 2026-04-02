@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>so101_manipulation</name>
+  <version>0.1.0</version>
+  <description>Pick-and-place manipulation pipeline for SO-101</description>
+  <maintainer email="adimunot21@gmail.com">Aditya Munot</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>moveit_msgs</exec_depend>
+  <exec_depend>trajectory_msgs</exec_depend>
+  <exec_depend>control_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>so101_perception</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

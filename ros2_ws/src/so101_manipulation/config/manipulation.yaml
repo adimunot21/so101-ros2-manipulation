@@ -1,0 +1,25 @@
+/**:
+  ros__parameters:
+    camera_to_base:
+      x: 0.12
+      y: 0.10
+      z: 0.70
+
+    grasp:
+      approach_height: 0.10
+      grasp_height: 0.03
+      lift_height: 0.12
+      gripper_open: 1.0
+      gripper_closed: -0.1
+
+    # Place: same X, small Y offset — well within workspace
+    place:
+      x: 0.15
+      y: -0.06
+      z: 0.03
+
+    poses:
+      home: [0.0, 0.0, 0.0, 0.0, 0.0]
+
+    trajectory_time_sec: 3.0
+    settle_time_sec: 0.5
